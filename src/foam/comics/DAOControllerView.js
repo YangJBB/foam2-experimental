@@ -15,10 +15,19 @@
  * limitations under the License.
  */
 
-foam.INTERFACE({
-  package: 'foam.core',
-  name: 'Serializable',
-
-  documentation:
-      'Marker interface to indicate that a CLASS is serializble or not.'
+foam.CLASS({
+  package: 'foam.comics',
+  name: 'DAOControllerView',
+  extends: 'foam.u2.View',
+  requires: [
+    'foam.comics.DAOController'
+  ],
+  methods: [
+    function initE() {
+      this.add(
+        this.DAOController.PREDICATE,
+        this.DAOController.FILTERED_DAO
+      );
+    }
+  ]
 });
