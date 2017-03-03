@@ -156,7 +156,7 @@ foam.CLASS({
           this.selectionQuery = this.Or.create({
             args: [ q, this.selectionQuery ]
           }).partialEval();
-        } else if (this.selectionQuery) {
+        } else if (this.selectionQuery && this.selectionQuery.args) {
             var selections = this.selectionQuery.args.filter(function(pred) {
                 return pred.arg2.value != obj.id;
             });
@@ -169,6 +169,9 @@ foam.CLASS({
                 slot.set(null);
                 //this.clearProperty('selectionQuery'); - doesn't work on import
             }
+        } else if (this.selectionQuery) {
+                this.selectionQuery = this.False.create();
+                slot.set(null);
         }
       }
     }
