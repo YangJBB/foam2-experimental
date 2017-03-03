@@ -66,13 +66,14 @@ foam.CLASS({
     // TODO(braden): This should implement Expressions instead.
     'foam.mlang.predicate.And',
     'foam.mlang.predicate.Eq',
+    'foam.mlang.predicate.False',
     'foam.mlang.predicate.Not',
     'foam.mlang.predicate.Or',
     'foam.u2.CheckBox',
     'foam.u2.TableCellRefinement'
   ],
   imports: [
-    'selectionQuery', // Optional. Installed by the TableSelection decorator.
+    'selectionQuery?', // Optional. Installed by the TableSelection decorator.
     'tableView'
   ],
 
@@ -155,10 +156,19 @@ foam.CLASS({
           this.selectionQuery = this.Or.create({
             args: [ q, this.selectionQuery ]
           }).partialEval();
-        } else {
-          this.selectionQuery = this.And.create({
-            args: [ this.Not.create({ arg1: q }), this.selectionQuery ]
-          }).partialEval();
+        } else if (this.selectionQuery) {
+            var selections = this.selectionQuery.args.filter(function(pred) {
+                return pred.arg2.value != obj.id;
+            });
+            if (selections.length > 0) {
+                this.selectionQuery = this.Or.create({
+                    args: selections
+                }).partialEval();
+            } else {
+                this.selectionQuery = this.False.create();
+                slot.set(null);
+                //this.clearProperty('selectionQuery'); - doesn't work on import
+            }
         }
       }
     }

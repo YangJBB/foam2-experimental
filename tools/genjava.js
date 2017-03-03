@@ -45,6 +45,7 @@ var classes = [
   'foam.mlang.predicate.Gte',
   'foam.mlang.predicate.Lt',
   'foam.mlang.predicate.Lte',
+  'foam.mlang.predicate.Has',
   'foam.mlang.Expr',
   'foam.mlang.AbstractExpr',
   'foam.mlang.predicate.Eq',
@@ -81,7 +82,10 @@ var classes = [
   'foam.dao.SkipSink',
   'foam.dao.FlowControl',
   'foam.mlang.order.Comparator',
-  'foam.mlang.sink.Count'
+  'foam.mlang.sink.Count',
+  //'foam.core.Property', - comment to not overwrite manual changes
+  'foam.core.AbstractEnum',
+  'foam.core.Enum'
 ];
 
 var abstractClasses = [

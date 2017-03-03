@@ -448,7 +448,10 @@ foam.CLASS({
   actions: [
     {
       name: 'clear',
-      code: function() { this.searchMgr_.clear(); }
+      code: function() {
+        this.searchMgr_.clear();
+        this.updateCount();
+      }
     },
     {
       name: 'newFilter',
