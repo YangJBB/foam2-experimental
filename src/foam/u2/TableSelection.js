@@ -140,13 +140,9 @@ foam.CLASS({
           arg1: this.of.ID,
           delegate: this.ArraySink.create()
         })).then(function(array) {
-          var q = self.In.create({
+          self.selectionQuery = self.In.create({
             arg1: self.of.ID,
             arg2: array.delegate.a
-          });
-
-          self.selectionQuery = self.Or.create({
-            args: [ self.selectionQuery, q ]
           }).partialEval();
         });
       }
