@@ -156,23 +156,10 @@ foam.CLASS({
           this.selectionQuery = this.Or.create({
             args: [ q, this.selectionQuery ]
           }).partialEval();
-        } else if (this.selectionQuery) {
-            var selections = [];
-            if (this.selectionQuery.args) {
-                selections = this.selectionQuery.args.filter(function(pred) {
-                    return pred.arg2.value != obj.id;
-                });
-            }
-            if (selections.length == 0) {
-                this.selectionQuery = this.False.create();
-                slot.set(null);
-            } else if (selections.length == 1) {
-                this.selectionQuery = selections[0];
-            } else {
-                this.selectionQuery = this.Or.create({
-                    args: selections
-                }).partialEval();
-            }
+        } else {
+          this.selectionQuery = this.And.create({
+            args: [ this.Not.create({ arg1: q }), this.selectionQuery ]
+          }).partialEval();
         }
       }
     }
