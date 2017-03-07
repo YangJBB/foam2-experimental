@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,5 @@
  * limitations under the License.
  */
 
-foam.CLASS({
-  package: 'foam.physics',
-  name: 'PhysicalCircle',
-  extends: 'foam.graphics.Circle',
-  implements: [ 'foam.physics.Physical' ],
-
-  documentation: 'A Circle with Physical support.'
-});
+global.FOAM_FLAGS = { debug: true, gcloud: true };
+(typeof require !== "undefined") &&  require("../../../src/foam.js");
