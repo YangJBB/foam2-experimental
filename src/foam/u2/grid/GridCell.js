@@ -28,7 +28,8 @@ foam.CLASS
           code: function() {/*
                 ^grid-cell {
                     border: 1px solid black; 
-                    align: center; 
+                    align: center;
+                    height: 1px; 
                 }
                 ^row-highlight {
                     background-color:rgba(0, 0, 255, 0.1);
