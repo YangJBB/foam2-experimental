@@ -2,12 +2,12 @@ foam.CLASS({
     package: 'foam.dao',
     name: 'ReferenceDAO',
     extends: 'foam.dao.ProxyDAO',
-    
-    documentation: {
-      /**
-       *--- overriding both select and find. 
-       *--- loading relevant property objects via propertyId in referenceDAOKey. 
-       */
+
+    documentation: function() {
+         /**
+          * --- overriding both select and find. 
+          * --- loading relevant property objects via propertyId in referenceDAOKey. 
+          */
     },
 
     requires: [
