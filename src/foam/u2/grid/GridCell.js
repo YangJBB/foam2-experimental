@@ -232,7 +232,8 @@ foam.CLASS
                     d = d.orderBy(this.order);
                 }
                 //wrapper class to get additional properties from the result
-                if (this.wrapperDAOClass) d = this.wrapperDAOClass.create({delegate: d}, this);
+                if (this.wrapperDAOClass)
+                    d = this.wrapperDAOClass.create({delegate: d}, this);
 
                 d.select().then(function(result){
                     
@@ -270,7 +271,7 @@ foam.CLASS
         
         function getCellView(a){
             if (this.cellView){
-                var v = this.cellView$cls.create({of: this.of, data: a});
+                var v = this.cellView$cls.create({of: this.of, data: a}, this);
                 return v; 
             }
             var d = foam.u2.Element.create('div');
