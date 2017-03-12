@@ -6,8 +6,11 @@ foam.CLASS
 
     imports: [
         'entrySelection',
-        //cell selectoin is currently disabled, because it conflicts with entry selection.
-        
+        //
+        // NOTE: if the cellView has property cellSelection, then the
+        // cell will recieve click events which it can pass on by
+        // assigning to entrySelection.
+        //
         'rowSelectionProperty',
         'colSelectionProperty',
         'rowHeaderSelectionProperty',
@@ -245,8 +248,12 @@ foam.CLASS
                     result.a.forEach(function(entry){
                         var v = this.getEntryView(entry); 
                             v.on('click',  function(){
-                            //console.log('entry selected in GridCel.js');
-                            this.entrySelection = entry; 
+                                //console.log('entry selected in GridCel.js');
+                                if (this.cellView && this.cellView.CELL_SELECTION) {
+                                    this.cellView.cellSelection = entry;
+                                } else {
+                                    this.entrySelection = entry;
+                                }
                         }.bind(this)); 
                         div.add(v); 
                     }.bind(this)); 
