@@ -17,40 +17,42 @@
 
 foam.CLASS({
   package: 'foam.u2.mcw',
-  name: 'Button',
-  extends: 'foam.u2.ActionView',
+  name: 'DetailPropertyView',
+  extends: 'foam.u2.Element',
+
+  documentation: 'Material Design View for one row/property of a DetailView.',
 
   properties: [
     {
-      name: 'ripple_',
-      factory: function() { return new mdc.ripple.MDCRipple(this.el()); }
+      name: 'peer_',
+      factory: function() { return new mdc.textfield.MDCTextfield(this.el()); }
     },
-    {
-      class: 'Boolean',
-      name: 'raised',
-      value: true
-    },
-    {
-      class: 'Boolean',
-      name: 'primary',
-      value: false
-    }
+    'prop'
   ],
 
   methods: [
     function initE() {
-      this.attrs({type: 'button'}).SUPER();
+      var prop = this.prop;
+
+      this.nodeName = 'label';
+
+      this.
+        cssClass('mdc-textfield').
+        style({display: 'block'}).
+        start('input'/*prop*/).cssClass('mdc-textfield__input').end().
+        start('span').
+          cssClass('mdc-textfield__label').
+          add(prop.label).
+        end();
     },
 
     function load() {
       this.SUPER();
-      this.ripple_.foundation_.init();
-    },
-
-    function initCls() {
-      this.cssClass('mdc-button');
-      if ( this.raised  ) this.cssClass('mdc-button--raised');
-      if ( this.primary ) this.cssClass('mdc-button--primary');
+      this.peer_.foundation_.init();
     }
   ]
 });
+
+
+// TODO: Add Unit support
+// prop.units && this.E('span').cssClass('foam-u2-PropertyView-units').add(' ', prop.units)).

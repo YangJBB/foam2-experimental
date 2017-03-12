@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2017 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,44 +16,35 @@
  */
 
 foam.CLASS({
-  package: 'foam.u2',
+  package: 'foam.u2.mcw',
   name: 'TextField',
-  extends: 'foam.u2.tag.Input',
-
-  axioms: [
-    foam.u2.CSS.create({
-      code: function CSS() {/*
-        ^:read-only { border-width: 0; }
-      */}
-    })
-  ],
+  extends: 'foam.u2.TextField',
 
   properties: [
     {
-      class: 'Int',
-      name: 'displayWidth'
+      name: 'peer_',
+      factory: function() { return new mdc.textfield.MDCTextfield(this.el()); }
     },
-    'type'
+    {
+      class: 'Boolean',
+      name: 'raised',
+      value: true
+    },
+    {
+      class: 'Boolean',
+      name: 'primary',
+      value: false
+    }
   ],
 
   methods: [
-    function initE() {
+    function load() {
       this.SUPER();
-
-      if ( this.type         ) this.setAttribute('type', this.type);
-      if ( this.displayWidth ) this.setAttribute('size', this.displayWidth);
+      this.peer_.foundation_.init();
     },
 
-    function fromProperty(prop) {
-      this.SUPER(prop);
-
-      if ( ! this.displayWidth ) {
-        this.displayWidth = prop.displayWidth;
-      }
-
-      if ( prop.visibility ) {
-        this.visibility = prop.visibility;
-      }
+    function initCls() {
+      this.cssClass('mdc-textfield');
     }
   ]
 });
