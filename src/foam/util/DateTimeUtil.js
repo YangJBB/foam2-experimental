@@ -5,6 +5,15 @@ foam.LIB({
     
     function floatToMinutes(obj){
         return (obj?Math.round(obj):0);
+    },
+    
+    //set the date of d1 to tat of d2
+    function setDateOnly(d1, d2){
+        var d = new Date(d1); 
+        d.setDate(d2.getDate());
+        d.setMonth(d2.getMonth());
+        d.setYear(d2.getYear());
+        return d; 
     }, 
     
     function toLocalTime(dd){

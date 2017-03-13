@@ -270,7 +270,7 @@ foam.CLASS
         
         function getCellView(a){
             if (this.cellView){
-                var v = this.cellView$cls.create({of: this.of, data: a});
+                var v = this.cellView.create({of: this.of, data: a});
                 return v; 
             }
             var d = foam.u2.Element.create('div');

@@ -85,7 +85,8 @@ foam.CLASS({
           add(this.ONE_WAY).tag('br').
           add(this.DEPART_DATE).tag('br').
           start(this.RETURN_DATE).attrs({mode: this.returnDateMode$}).end().tag('br').
-          add(this.BOOK);
+          add(this.BOOK).
+          start(this.STOP, {data: this}).end();
     }
   ],
 
@@ -100,6 +101,16 @@ foam.CLASS({
           'one-way flight on ' + depart :
           'flight departing on ' + depart + ' and returning ' + this.returnDate.toLocaleDateString() ) + '.');
       }
+    },
+    {
+        name: 'stop',
+        code: function(){
+            var d = 0; 
+            this.departDate.setDate((new Date()).getDate() - 10);
+            console.log(this.departDate);
+            console.log(this.errors_);
+            debugger; 
+        }
     }
   ]
 });

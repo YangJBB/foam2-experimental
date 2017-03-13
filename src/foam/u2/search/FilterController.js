@@ -113,7 +113,7 @@ foam.CLASS({
       name: 'data',
       required: true,
       postSet: function(old, nu) {
-        if ( old ) old.on.reset.unsub(this.updateCount);
+        if ( old  && old.on.reset.unsub ) old.on.reset.unsub(this.updateCount);
         if ( nu ) nu.on.reset.sub(this.updateCount);
         this.updateCount();
       }

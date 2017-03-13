@@ -275,7 +275,7 @@ foam.CLASS
                     }else {
                         var currCell = this.GridCell.create({
                                 data$: this.data$,
-                                cellView$: this.cellView$, 
+                                cellView: this.cellView, 
                                 rowMatch: this.rowPropertiesArray[i],
                                 colMatch: this.colPropertiesArray[j],
                                 rowProperty: this.rowProperty, 

@@ -54,7 +54,8 @@ foam.CLASS({
           z-index: 1;
         }
         ^content {
-box-shadow: 3px 3px 6px 0 gray; 
+          display: inline-block; 
+            box-shadow: 3px 3px 6px 0 gray; 
           margin: 4px;
           padding: 0;
           background: white;
