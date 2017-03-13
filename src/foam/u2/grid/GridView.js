@@ -251,16 +251,16 @@ foam.CLASS
                 for (var j=-1; j< this.colPropertiesArray.length; j++){
                     //corner of cell. 
                     if (i == -1 && j ==-1){
-                    var cornerCell = this.GridHeaderCell.create({
-                        name: '--'}
-                        );
+                        var cornerCell = this.GridHeaderCell.create({
+                            name: '--'
+                        }, this);
                         r.add(cornerCell);
                     }else if (j==-1){ //header row 
                         var rowHeaderCell = this.GridHeaderCell.create({
                             data: this.rowPropertiesArray[i]!==undefined?this.rowPropertiesArray[i]:this.rowHeaderUndefinedMatch,
                             property: this.rowProperty,
                             isRowHeader: true, 
-                            }); 
+                        }, this); 
                         rowHeaderCell.sub('selected', this.onRowSelect);
                         r.add(rowHeaderCell);
                     }else if (i==-1){ //header column
@@ -268,7 +268,7 @@ foam.CLASS
                             data: this.colPropertiesArray[j]!==undefined?this.colPropertiesArray[j]:this.colHeaderUndefinedMatch,
                             property: this.colProperty,
                             isColHeader: true, 
-                            });
+                        }, this);
                         colHeaderCell.sub('selected', this.onColSelect);
                         r.add(colHeaderCell);
 
@@ -283,7 +283,8 @@ foam.CLASS
                                 order: this.order,
                                 wrapperClass: this.cellWrapperClass,
                                 wrapperDAOClass: this.wrapperDAOClass, 
-                            });
+                            }, this);
+
                         r.add(currCell);
                         currCellRow.push(currCell); 
                     }
