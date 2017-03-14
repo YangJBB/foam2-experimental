@@ -52,8 +52,8 @@ foam.CLASS({
     {
       name: 'cardinality',
       assertValue: function(value) {
-        foam.assert(value === '1:1' || value === '1:*' || value === '*:1' || value === '*:*',
-          'Current supported cardinalities are 1:1 1:* *:1 and *:*');
+        foam.assert(value === '1:*' || value === '*:*',
+          'Supported cardinalities are 1:* and *:*');
       },
       value: '1:*'
     },
@@ -86,6 +86,29 @@ foam.CLASS({
       }
     },
     {
+      name: 'adaptTarget',
+      factory: function() {
+        var inverseName = this.inverseName;
+
+        return function(source, target) {
+          target[inverseName] = source.id;
+
+          return target;
+        }
+      }
+    },
+    /*
+    {
+      name: 'adaptSource',
+      factory: function() {
+        var forwardName = this.forwardName;
+
+        return function(target, source) {
+          source[forwardName] = target.id;
+        }
+      }
+    },*/
+    {
       class: 'FObjectArray',
       name: 'targetProperties',
       of: 'Property',
@@ -117,18 +140,18 @@ foam.CLASS({
     function init() {
       var sourceProps  = this.sourceProperties || [];
       var targetProps  = this.targetProperties || [];
-      var cardinality  = this.cardinality.split(':');
+      var cardinality  = this.cardinality;
       var forwardName  = this.forwardName;
       var inverseName  = this.inverseName;
       var relationship = this;
+      var source       = this.lookup(this.sourceModel);
+      var target       = this.lookup(this.targetModel);
 
-      if ( this.cardinality === '*:*' ) {
+      foam.assert(source, 'Unknown sourceModel: ', this.sourceModel);
+      foam.assert(target, 'Unknown targetModel: ', this.targetModel);
 
-        return;
-      }
-
-      if ( ! sourceProps.length ) {
-        if ( cardinality[1] === '*' ) {
+      if ( cardinality === '1:*' ) {
+        if ( ! sourceProps.length ) {
           sourceProps = [
             foam.core.Property.create({
               name: forwardName,
@@ -142,38 +165,11 @@ foam.CLASS({
                     relationship: relationship
                   }, this)
               }
-            }).copyFrom(this.sourceProperty)
-          ];
-        } else {
-          sourceProps = [
-            foam.core.Reference.create({
-              name: forwardName,
-              of: this.targetModel,
-              targetDAOKey: this.targetDAOKey
             }).copyFrom(this.sourceProperty)
           ];
         }
-      }
 
-      if ( ! targetProps.length ) {
-        if ( cardinality[0] == '*' ) {
-          targetProps = [
-            foam.core.Property.create({
-              name: forwardName,
-              transient: true,
-              setter: function() {},
-              getter: function() {
-                return this.instance_[forwardName] ?
-                  this.instance_[forwardName] :
-                  this.instance_[forwardName] = foam.dao.RelationshipDAO.create({
-                    obj: this,
-                    forward: false,
-                    relationship: relationship
-                  }, this)
-              }
-            }).copyFrom(this.targetProperty)
-          ];
-        } else {
+        if ( ! targetProps.length ) {
           targetProps = [
             foam.core.Reference.create({
               name: inverseName,
@@ -182,29 +178,75 @@ foam.CLASS({
             }).copyFrom(this.targetProperty)
           ];
         }
-      }
 
-      foam.assert(
+        foam.assert(
           sourceProps.length === targetProps.length,
           'Relationship source/target property list length mismatch.');
 
-      var source = this.lookup(this.sourceModel);
-      var target = this.lookup(this.targetModel);
+        for ( var i = 0 ; i < sourceProps.length ; i++ ) {
+          var sp = sourceProps[i];
+          var tp = targetProps[i];
 
-      foam.assert(source, 'Unknown sourceModel: ', this.sourceModel);
-      foam.assert(target, 'Unknown targetModel: ', this.targetModel);
+          if ( ! source.getAxiomByName(sp.name) ) {
+            source.installAxiom(sp);
+          }
 
-      for ( var i = 0 ; i < sourceProps.length ; i++ ) {
-        var sp = sourceProps[i];
-        var tp = targetProps[i];
+          if ( ! this.oneWay && ! target.getAxiomByName(tp.name) ) {
+            target.installAxiom(tp);
+          }
+        }
+      } else { /* cardinality === '*.*' */
+        var name   = source.name + target.name + 'Junction';
+        var id     = source.package ? source.package + '.' + name : name;
+        var jModel = foam.lookup(id, true);
 
-        if ( ! source.getAxiomByName(sp.name) ) {
-          source.installAxiom(sp);
+        if ( ! jModel ) {
+          foam.CLASS({
+            package: source.package,
+            name: name,
+            ids: [ 'sourceId', 'targetId' ],
+            properties: [ 'sourceId', 'targetId' ]
+          });
+
+          jModel = foam.lookup(id);
         }
 
-        if ( ! this.oneWay && ! target.getAxiomByName(tp.name) ) {
-          target.installAxiom(tp);
-        }
+        foam.RELATIONSHIP({
+          sourceModel: this.sourceModel,
+          targetModel: id,
+          forwardName: this.forwardName,
+          inverseName: 'sourceId',
+          sourceDAOKey: this.sourceDAOKey,
+          targetDAOKey: this.junctionDAOKey,
+          adaptTarget: function(s, t) {
+            if ( target.isInstance(t) ) {
+              t = jModel.create(t);
+            }
+
+            t.sourceId = s.id;
+
+            return t;
+          }
+        });
+
+        // reverse
+        foam.RELATIONSHIP({
+          sourceModel: this.targetModel,
+          targetModel: id,
+          forwardName: this.inverseName,
+          inverseName: 'targetId',
+          sourceDAOKey: this.targetDAOKey,
+          targetDAOKey: this.junctionDAOKey,
+          adaptTarget: function(s, t) {
+            if ( source.isInstance(t) ) {
+              t = jModel.create(t);
+            }
+
+            t.targetId = s.id;
+
+            return t;
+          }
+        });
       }
 
       /*
@@ -226,14 +268,6 @@ foam.CLASS({
       var name        = forward ? this.inverseName : this.forwardName;
       var targetProp  = targetClass[foam.String.constantize(name)];
       return this.EQ(targetProp, obj.id);
-    },
-
-    function adaptTarget(source, target, forward) {
-      if ( forward ) {
-        target[this.inverseName] = source.id;
-      } else {
-        source[this.forwardName] = target.id;
-      }
     }
   ]
 });
