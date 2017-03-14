@@ -117,6 +117,26 @@ foam.CLASS
         },
 
         /*
+         *---------------------------------- Header Generation --------------------
+         */
+         
+         {
+            name: 'gridRowHeaderCellView',
+            class: 'Class',
+            value: 'foam.u2.grid.GridHeaderCell'
+         },
+        {
+            name: 'gridColHeaderCellView',
+            class: 'Class',
+            value: 'foam.u2.grid.GridHeaderCell'
+         },
+        {
+            name: 'gridCornerHeaderCellView',
+            class: 'Class',
+            value: 'foam.u2.grid.GridHeaderCell'
+         },        
+         
+        /*
          *---------------------------------- Row and Column generation : data source -----------------------
          */
         {
@@ -251,12 +271,12 @@ foam.CLASS
                 for (var j=-1; j< this.colPropertiesArray.length; j++){
                     //corner of cell. 
                     if (i == -1 && j ==-1){
-                        var cornerCell = this.GridHeaderCell.create({
-                            name: '--'
+                        var cornerCell = this.gridCornerHeaderCellView.create({
+                            name: '/'
                         }, this);
                         r.add(cornerCell);
                     }else if (j==-1){ //header row 
-                        var rowHeaderCell = this.GridHeaderCell.create({
+                        var rowHeaderCell = this.gridRowHeaderCellView.create({
                             data: this.rowPropertiesArray[i]!==undefined?this.rowPropertiesArray[i]:this.rowHeaderUndefinedMatch,
                             property: this.rowProperty,
                             isRowHeader: true, 
@@ -264,7 +284,7 @@ foam.CLASS
                         rowHeaderCell.sub('selected', this.onRowSelect);
                         r.add(rowHeaderCell);
                     }else if (i==-1){ //header column
-                        var colHeaderCell = this.GridHeaderCell.create({
+                        var colHeaderCell = this.gridColHeaderCellView.create({
                             data: this.colPropertiesArray[j]!==undefined?this.colPropertiesArray[j]:this.colHeaderUndefinedMatch,
                             property: this.colProperty,
                             isColHeader: true, 

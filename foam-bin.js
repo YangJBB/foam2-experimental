@@ -3930,7 +3930,15 @@ foam.CLASS({
   name: 'Errors',
 //  extends: 'foam.core.Property',
 
-  documentation: 'A psedo-Property Axiom added to FObject which contains an object\'s validation errors.',
+  documentation: `
+    A psedo-Property Axiom added to FObject which contains an object\'s validation errors.
+    Adds the following attributes to an Object:
+    <dl>
+      <dt>errors_</dt><dd>list of current errors</dd>
+      <dt>errors_$</dt><dd>Slot representation of errors_</dd>
+      <dt>validateObject()</dt><dd>calls the validateObj() method of all property Axioms, allowing them to populate errors_</dd>
+    </dl>
+  `,
 
   properties: [
     [ 'name', 'errors_' ]
@@ -4147,6 +4155,16 @@ foam.CLASS({
       }
     ],
     [ 'value', '' ]
+  ]
+});
+
+foam.CLASS({
+  refines: 'foam.core.Model',
+
+  documentation: 'Upgrade Mode.documentation to a proper String property.',
+
+  properties: [
+    { class: 'String', name: 'documentation' }
   ]
 });
 
@@ -4574,27 +4592,28 @@ foam.CLASS({
  * limitations under the License.
  */
 
-/**
-  Topics delcare the types of events that an object pubes.
-<pre>
-  Ex.
-  foam.CLASS({
-    name: 'Alarm',
-    topics: [ 'ring' ]
-  });
-
-  then doing:
-  alarm.ring.pub();
-  alarm.ring.sub(l);
-
-  is the same as:
-  alarm.pub('ring');
-  alarm.sub('ring', l);
-</pre>
-*/
 foam.CLASS({
   package: 'foam.core',
   name: 'Topic',
+
+  documentation: `
+  Topics delcare the types of events that an object publishes.
+  <pre>
+    Ex.
+    foam.CLASS({
+      name: 'Alarm',
+      topics: [ 'ring' ]
+    });
+
+    then doing:
+    alarm.ring.pub();
+    alarm.ring.sub(l);
+
+    is the same as:
+    alarm.pub('ring');
+    alarm.sub('ring', l);
+  </pre>
+  `,
 
   properties: [
     'name',
@@ -7247,11 +7266,12 @@ foam.LIB({
         var commentMatcher = /.*(\@arg|\@param|\@return)\s+(?:\{(\.\.\.)?([\w._$\[\]]+)(\=)?\}\s+)?(.*?)\s+(?:([^\@]*))?/g;
         var commentMatch;
         while ( commentMatch = commentMatcher.exec(comment) ) {
-          var name = commentMatch[5];
+          var name     = commentMatch[5];
           var optional = commentMatch[4] === '=';
-          var repeats = commentMatch[2] === '...';
-          var type = commentMatch[3];
-          var docs = commentMatch[6] && commentMatch[6].trim();
+          var repeats  = commentMatch[2] === '...';
+          var type     = commentMatch[3];
+          var docs     = commentMatch[6] && commentMatch[6].trim();
+
           if ( commentMatch[1] === '@return' ) {
             if ( ret.returnType ) {
               throw new SyntaxError(
@@ -7259,6 +7279,7 @@ foam.LIB({
                   'definition in block comment: \"' +
                   type + '\" from \:\n' + fn.toString());
             }
+
             ret.returnType = foam.core.Argument.create({
               name: 'ReturnValue',
               optional: optional,
@@ -7276,11 +7297,12 @@ foam.LIB({
                     'definition in block comment: \"' +
                     name + '\" from:\n' + fn.toString());
               }
-              retMapByName[name].typeName = type;
-              retMapByName[name].optional = optional;
-              retMapByName[name].repeats = repeats;
+
+              retMapByName[name].typeName      = type;
+              retMapByName[name].optional      = optional;
+              retMapByName[name].repeats       = repeats;
               retMapByName[name].documentation = docs;
-              retMapByName[name].type = this.resolveTypeString(type);
+              retMapByName[name].type          = this.resolveTypeString(type);
             } else {
               var arg = foam.core.Argument.create({
                 name:          name,
@@ -7302,6 +7324,7 @@ foam.LIB({
       for ( var i = 0; i < ret.length; i++ ) {
         if ( ! ret[i].typeName ) missingTypes.push(ret[i].name);
       }
+
       if ( missingTypes.length ) {
         //(this.warn || console.warn)('Missing type(s) for ' +
         //  missingTypes.join(', ') + ' in:\n' + fn.toString());
@@ -7313,10 +7336,11 @@ foam.LIB({
 });
 
 
-/** Describes one argument of a function or method. */
 foam.CLASS({
   package: 'foam.core',
   name: 'Argument',
+
+  documentation: 'Describes one argument of a function or method.',
 
   properties: [
     {
@@ -7391,6 +7415,7 @@ foam.CLASS({
               ', expected type ' + this.typeName + ' but passed ' + gotType);
         }
       };
+
       validate.isTypeChecked__ = true; // avoid type checking this method
       return validate;
     })()
@@ -8959,6 +8984,15 @@ foam.CLASS({
             a[i] = this.objectify(o[i]);
           }
           return a;
+        },
+        Object: function(o) {
+          var ret = {};
+          for ( var key in o ) {
+            // NOTE: Could lazily construct "ret" first time
+            // this.objectify(o[key]) !== o[key].
+            if ( o.hasOwnProperty(key) ) ret[key] = this.objectify(o[key]);
+          }
+          return ret;
         }
       },
       function(o) { return o; })
@@ -11384,7 +11418,7 @@ foam.LIB({
         var d = new Date(d1); 
         d.setDate(d2.getDate());
         d.setMonth(d2.getMonth());
-        d.setYear(d2.getYear());
+        d.setFullYear(d2.getFullYear());
         return d; 
     }, 
     
@@ -15558,7 +15592,8 @@ foam.CLASS({
         if ( ! o.f && typeof o === 'function' ) return foam.mlang.predicate.Func.create({ fn: o });
         if ( typeof o !== 'object' )            return foam.mlang.Constant.create({ value: o });
         if ( o instanceof Date )                return foam.mlang.Constant.create({ value: o });
-        if ( foam.core.FObject.isInstance(o) || Array.isArray(o) ) return o;
+        if ( Array.isArray(o) )                 return foam.mlang.Constant.create({ value: o });
+        if ( foam.core.FObject.isInstance(o) )  return o;
 
         console.error('Invalid expression value: ', o);
       }
@@ -16240,13 +16275,14 @@ foam.CLASS({
   methods: [
     function f(o) {
       var lhs = this.arg1.f(o);
+      var rhs = this.arg2.f(o);
 
       // If arg2 is a constant array, we use valueSet for it.
-      if ( Array.isArray(this.arg2) ) {
+      if ( foam.mlang.Constant.isInstance(this.arg2) ) {
         if ( ! this.valueSet_ ) {
           var set = {};
-          for ( var i = 0 ; i < this.arg2.length ; i++ ) {
-            var s = this.arg2[i];
+          for ( var i = 0 ; i < rhs.length ; i++ ) {
+            var s = rhs[i];
             if ( this.upperCase_ ) s = s.toUpperCase();
             set[s] = true;
           }
@@ -16256,7 +16292,6 @@ foam.CLASS({
         return !! this.valueSet_[lhs];
       }
 
-      var rhs = this.arg2.f(o);
       return rhs ? rhs.indexOf(lhs) !== -1 : false;
     }
   ]
@@ -16285,19 +16320,20 @@ foam.CLASS({
   methods: [
     function f(o) {
       var lhs = this.arg1.f(o).toUpperCase();
+      var rhs = this.arg2.f(o);
+
       // If arg2 is a constant array, we use valueSet for it.
-      if ( Array.isArray(this.arg2) ) {
+      if ( foam.mlang.Constant.isInstance(this.arg2) ) {
         if ( ! this.valueSet_ ) {
           var set = {};
-          for ( var i = 0 ; i < this.arg2.length ; i++ ) {
-            set[this.arg2[i].toUpperCase()] = true;
+          for ( var i = 0 ; i < rhs.length ; i++ ) {
+            set[rhs[i].toUpperCase()] = true;
           }
           this.valueSet_ = set;
         }
 
         return !! this.valueSet_[lhs];
       } else {
-        var rhs = this.arg2.f(o);
         if ( ! rhs ) return false;
         return rhs.toUpperCase().indexOf(lhs) !== -1;
       }
@@ -18958,9 +18994,9 @@ foam.CLASS({
       var expr = isExprMatch(m.In);
       if ( expr ) {
         predicate = expr.predicate;
-           // Just scan if that would be faster.
-        if ( Math.log(this.size())/Math.log(2) * expr.arg2.length < this.size() ) {
-          var keys = expr.arg2;
+        var keys = expr.arg2.f();
+        // Just scan if that would be faster.
+        if ( Math.log(this.size())/Math.log(2) * keys.length < this.size() ) {
           var subPlans = [];
           cost = 1;
 
@@ -20058,11 +20094,10 @@ foam.CLASS({
     'forwardName',
     'inverseName',
     {
-      // TODO: Support many to many relationships (cardinality of '*:*')
       name: 'cardinality',
       assertValue: function(value) {
-        foam.assert(value == '1:1' || value == '1:*' || value == '*:1',
-          'Current supported cardinalities are 1:1 1:* and *:1');
+        foam.assert(value === '1:1' || value === '1:*' || value === '*:1' || value === '*:*',
+          'Current supported cardinalities are 1:1 1:* *:1 and *:*');
       },
       value: '1:*'
     },
@@ -20077,6 +20112,10 @@ foam.CLASS({
     },
     {
       name: 'targetModel'
+    },
+    {
+      name: 'junctionModel',
+      factory: function() { return this.sourceModel + this.targetModel + 'Junction'; }
     },
     {
       name: 'targetDAOKey',
@@ -20126,6 +20165,11 @@ foam.CLASS({
       var forwardName  = this.forwardName;
       var inverseName  = this.inverseName;
       var relationship = this;
+
+      if ( this.cardinality === '*:*' ) {
+
+        return;
+      }
 
       if ( ! sourceProps.length ) {
         if ( cardinality[1] === '*' ) {
@@ -22323,6 +22367,184 @@ foam.CLASS({
     function addIndex(prop) {
       this.indicies.push([prop.name, false]);
       return this;
+    }
+  ]
+});
+/**
+ * @license
+ * Copyright 2017 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+foam.CLASS({
+  package: 'foam.dao',
+  name: 'RestDAO',
+  extends: 'foam.dao.AbstractDAO',
+
+  documentation: function() {/*
+    A client-side DAO for interacting with a REST endpoint.
+
+    Sinks are managed on the client (i.e., sinks passed to
+    select() will not serialize the sink and send it to the
+    endpoint for server-side logic implementation).
+  */},
+
+  requires: [
+    'foam.dao.ArraySink',
+    'foam.net.HTTPRequest'
+  ],
+
+  properties: [
+    {
+      class: 'String',
+      name: 'baseURL',
+      documentation: 'URL for most rest calls. Some calls add "/<some-info>".',
+      final: true,
+      required: true
+    }
+  ],
+
+  methods: [
+    function put(o) {
+      /**
+       * PUT baseURL
+       * <network-foam-jsonified FOAM object>
+       */
+      return this.createRequest_({
+        method: 'PUT',
+        url: this.baseURL,
+        payload: this.jsonify_(o)
+      }).send().then(this.onPutResponse);
+    },
+
+    function remove(o) {
+      /**
+       * DELETE baseURL/<network-foam-jsonified FOAM object id>
+       */
+      return this.createRequest_({
+        method: 'DELETE',
+        url: this.baseURL + '/' + encodeURIComponent(this.jsonify_(o.id))
+      }).send().then(this.onRemoveResponse);
+    },
+
+    function find(id) {
+      /**
+       * GET baseURL/<network-foam-jsonified FOAM object id>
+       */
+      return this.createRequest_({
+        method: 'GET',
+        url: this.baseURL + '/' + encodeURIComponent(this.jsonify_(id))
+      }).send().then(this.onFindResponse);
+    },
+
+    function select(sink, skip, limit, order, predicate) {
+      /**
+       * GET baseURL
+       * { skip, limit, order, predicate }
+       *
+       * Each key's value is network-foam-jsonified.
+       */
+      return this.createRequest_({
+        method: 'GET',
+        url: this.baseURL,
+        payload: this.prepareSelectRemoveAllPayload_(
+          skip, limit, order, predicate)
+      }).send().then(
+        this.onSelectResponse.bind(this, sink || this.ArraySink.create()));
+    },
+
+    function removeAll(skip, limit, order, predicate) {
+      /**
+       * POST baseURL/removeAll
+       * { skip, limit, order, predicate }
+       *
+       * Each key's value is network-foam-jsonified.
+       */
+      return this.createRequest_({
+        method: 'POST',
+        url: this.baseURL + '/removeAll',
+        payload: this.prepareSelectRemoveAllPayload_(
+          skip, limit, order, predicate)
+      }).send().then(this.onRemoveAllResponse);
+    },
+
+    function createRequest_(o) {
+      // Demand that required properties are set before using DAO.
+      this.validate();
+      // Each request should default to a json responseType.
+      return this.HTTPRequest.create(Object.assign({responseType: 'json'}, o));
+    },
+
+    function jsonify_(o) {
+      // What's meant by network-foam-jsonified for HTTP/JSON/REST APIs:
+      // Construct JSON-like object using foam's network strategy, then
+      // construct well-formed JSON from the object.
+      return JSON.stringify(foam.json.Network.objectify(o));
+    },
+
+    function prepareSelectRemoveAllPayload_(skip, limit, order, predicate) {
+      // Include only specified select/removeAll directives.
+      var payload = {};
+      if ( typeof skip !== 'undefined' ) payload.skip = skip;
+      if ( typeof limit !== 'undefined' ) payload.limit = limit;
+      if ( typeof order !== 'undefined' ) payload.order = order;
+      if ( typeof predicate !== 'undefined' ) payload.predicate = predicate;
+      return this.jsonify_(payload);
+    }
+  ],
+
+  listeners: [
+    function onResponse(name, response) {
+      if ( response.status !== 200 ) {
+        throw new Error(
+          'Unexpected ' + name + ' response code from REST DAO endpoint: ' +
+            response.status);
+      }
+    },
+
+    function onPutResponse(response) {
+      this.onResponse('put', response);
+      var o = foam.json.parse(response.payload);
+      this.pub('on', 'put', o);
+      return o;
+    },
+
+    function onRemoveResponse(response) {
+      this.onResponse('remove', response);
+      var o = foam.json.parse(response.payload);
+      if ( o !== null ) this.pub('on', 'remove', o);
+      return o;
+    },
+
+    function onFindResponse(response) {
+      this.onResponse('find', response);
+      return foam.json.parse(response.payload);
+    },
+
+    function onSelectResponse(sink, response) {
+      this.onResponse('select', response);
+      var results = foam.json.parse(response.payload);
+      for ( var i = 0; i < results.length; i++ ) {
+        sink.put(results[i]);
+      }
+      sink.eof();
+      return sink;
+    },
+
+    function onRemoveAllResponse(response) {
+      this.onResponse('removeAll', response);
+      return undefined;
     }
   ]
 });
@@ -28363,8 +28585,13 @@ foam.CLASS({
   methods: [
     function initE() {
       if ( this.type ) this.attrs({ type: this.type });
-      this.cssClass(this.myCls());
+      this.initCls();
       this.link();
+    },
+
+    function initCls() {
+      // Template method, can be overriden by sub-classes
+      this.cssClass(this.myCls());
     },
 
     function link() {
@@ -28461,6 +28688,14 @@ foam.CLASS({
   name: 'TextField',
   extends: 'foam.u2.tag.Input',
 
+  axioms: [
+    foam.u2.CSS.create({
+      code: function CSS() {/*
+        ^:read-only { border-width: 0; }
+      */}
+    })
+  ],
+
   properties: [
     {
       class: 'Int',
@@ -28488,14 +28723,6 @@ foam.CLASS({
         this.visibility = prop.visibility;
       }
     }
-  ],
-
-  axioms: [
-    foam.u2.CSS.create({
-      code: function CSS() {/*
-        ^:read-only { border-width: 0; }
-      */}
-    })
   ]
 });
 /**
@@ -28994,8 +29221,8 @@ foam.CLASS({
 
   properties: [
     {
-class: 'Proxy',
-of: 'foam.u2.DefaultValidator',
+      class: 'Proxy',
+      of: 'foam.u2.DefaultValidator',
       name: 'validator',
       value: foam.u2.HTMLValidator.create()
     }
@@ -32180,6 +32407,26 @@ foam.CLASS
         },
 
         /*
+         *---------------------------------- Header Generation --------------------
+         */
+         
+         {
+            name: 'gridRowHeaderCellView',
+            class: 'Class',
+            value: 'foam.u2.grid.GridHeaderCell'
+         },
+        {
+            name: 'gridColHeaderCellView',
+            class: 'Class',
+            value: 'foam.u2.grid.GridHeaderCell'
+         },
+        {
+            name: 'gridCornerHeaderCellView',
+            class: 'Class',
+            value: 'foam.u2.grid.GridHeaderCell'
+         },        
+         
+        /*
          *---------------------------------- Row and Column generation : data source -----------------------
          */
         {
@@ -32314,24 +32561,24 @@ foam.CLASS
                 for (var j=-1; j< this.colPropertiesArray.length; j++){
                     //corner of cell. 
                     if (i == -1 && j ==-1){
-                    var cornerCell = this.GridHeaderCell.create({
-                        name: '--'}
-                        );
+                        var cornerCell = this.gridCornerHeaderCellView.create({
+                            name: '/'
+                        }, this);
                         r.add(cornerCell);
                     }else if (j==-1){ //header row 
-                        var rowHeaderCell = this.GridHeaderCell.create({
+                        var rowHeaderCell = this.gridRowHeaderCellView.create({
                             data: this.rowPropertiesArray[i]!==undefined?this.rowPropertiesArray[i]:this.rowHeaderUndefinedMatch,
                             property: this.rowProperty,
                             isRowHeader: true, 
-                            }); 
+                        }, this); 
                         rowHeaderCell.sub('selected', this.onRowSelect);
                         r.add(rowHeaderCell);
                     }else if (i==-1){ //header column
-                        var colHeaderCell = this.GridHeaderCell.create({
+                        var colHeaderCell = this.gridColHeaderCellView.create({
                             data: this.colPropertiesArray[j]!==undefined?this.colPropertiesArray[j]:this.colHeaderUndefinedMatch,
                             property: this.colProperty,
                             isColHeader: true, 
-                            });
+                        }, this);
                         colHeaderCell.sub('selected', this.onColSelect);
                         r.add(colHeaderCell);
 
@@ -32346,7 +32593,8 @@ foam.CLASS
                                 order: this.order,
                                 wrapperClass: this.cellWrapperClass,
                                 wrapperDAOClass: this.wrapperDAOClass, 
-                            });
+                            }, this);
+
                         r.add(currCell);
                         currCellRow.push(currCell); 
                     }
@@ -32537,8 +32785,11 @@ foam.CLASS
 
     imports: [
         'entrySelection',
-        //cell selectoin is currently disabled, because it conflicts with entry selection.
-        
+        //
+        // NOTE: if the cellView has property cellSelection, then the
+        // cell will recieve click events which it can pass on by
+        // assigning to entrySelection.
+        //
         'rowSelectionProperty',
         'colSelectionProperty',
         'rowHeaderSelectionProperty',
@@ -32763,7 +33014,8 @@ foam.CLASS
                     d = d.orderBy(this.order);
                 }
                 //wrapper class to get additional properties from the result
-                if (this.wrapperDAOClass) d = this.wrapperDAOClass.create({delegate: d}, this);
+                if (this.wrapperDAOClass)
+                    d = this.wrapperDAOClass.create({delegate: d}, this);
 
                 d.select().then(function(result){
                     
@@ -32775,8 +33027,12 @@ foam.CLASS
                     result.a.forEach(function(entry){
                         var v = this.getEntryView(entry); 
                             v.on('click',  function(){
-                            //console.log('entry selected in GridCel.js');
-                            this.entrySelection = entry; 
+                                //console.log('entry selected in GridCel.js');
+                                if (this.cellView && this.cellView.CELL_SELECTION) {
+                                    this.cellView.cellSelection = entry;
+                                } else {
+                                    this.entrySelection = entry;
+                                }
                         }.bind(this)); 
                         div.add(v); 
                     }.bind(this)); 
@@ -32802,6 +33058,7 @@ foam.CLASS
         function getCellView(a){
             if (this.cellView){
                 var v = this.cellView.create({of: this.of, data: a});
+
                 return v; 
             }
             var d = foam.u2.Element.create('div');
@@ -32814,25 +33071,38 @@ foam.CLASS
         
         function isRowSelected(){
             if (! this.rowHeaderSelectionProperty) return false; 
-            if (foam.util.compare(this.rowHeaderSelectionProperty, this.rowHeaderUndefinedMatch) === 0 ){
+            if ((typeof this.rowHeaderSelectionProperty == typeof this.rowHeaderUndefinedMatch) &&
+                 foam.util.compare(this.rowHeaderSelectionProperty, this.rowHeaderUndefinedMatch) === 0 ){
                 if (this.rowMatch === undefined ) return true;
                 return false; 
             }
-            if (foam.util.compare(this.rowHeaderSelectionProperty, this.rowMatch) === 0)
+            //if (foam.util.compare(this.rowHeaderSelectionProperty, this.rowMatch) === 0)
+            //if(this.rowPredicate.f(this.rowHeaderSelectionProperty.id?this.rowHeaderSelectionProperty.id:this.this.rowHeaderSelectionProperty ))
+            if (this.checkPredicateAgainstProperty(this.rowPredicate, this.rowProperty, this.rowHeaderSelectionProperty))
                 return true;
             return false; 
         },
         
         function isColSelected(){
-            if (! this.colHeaderSelectionProperty) return false; 
-            if (foam.util.compare(this.colHeaderSelectionProperty, this.colHeaderUndefinedMatch) === 0 ){
+            if (! this.colHeaderSelectionProperty) return false;
+            if ((typeof this.colHeaderSelectionProperty == typeof this.colHeaderUndefinedMatch) &&
+                foam.util.compare(this.colHeaderSelectionProperty, this.colHeaderUndefinedMatch) === 0 ){
                 if (this.colMatch === undefined ) return true;
                 return false; 
             }
             if (foam.util.compare(this.colHeaderSelectionProperty, this.colMatch) === 0)
+            //if (this.colPredicate.f(this.colHeaderSelectionProperty.id?this.colHeaderSelectionProperty.id:this.colHeaderSelectionProperty))
                 return true;
             return false; 
         },
+        
+        function checkPredicateAgainstProperty(p, prop, propValue){
+            var name = (prop.name?prop.name:prop);
+            var value = propValue.id?propValue.id:propValue; 
+            var tempObj = {};
+            tempObj[name] =  value;
+            return p.f(tempObj); 
+        }, 
         
         function isCellSelected(){
             if (foam.util.compare(this.colSelectionProperty, this.colProperty)!== 0 || foam.util.compare(this.rowSelectionProperty, this.rowProperty)!== 0)
@@ -32918,7 +33188,8 @@ foam.CLASS
     
     
     
-}); foam.CLASS
+}); 
+foam.CLASS
 ({
     package: 'foam.u2.grid',
     name: 'GridHeaderCell',
@@ -35122,6 +35393,8 @@ foam.CLASS({
   name: 'DocBorder',
   extends: 'foam.u2.Element',
 
+  documentation: 'Titled raised View border used by the DocBrowser.',
+
   axioms: [
     foam.u2.CSS.create({
       code: function() {/*
@@ -35346,7 +35619,7 @@ foam.CLASS({
         if ( cls === foam.core.FObject ) break;
       }
       this.br();
-      this.add(data.model_.documentation);
+      this.start(foam.u2.HTMLElement).add(data.model_.documentation).end();
 
       this.add(this.slot(function (showInherited) {
         // TODO: hide 'Source Class' column if showInherited is false
