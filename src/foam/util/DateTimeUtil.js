@@ -12,7 +12,7 @@ foam.LIB({
         var d = new Date(d1); 
         d.setDate(d2.getDate());
         d.setMonth(d2.getMonth());
-        d.setYear(d2.getYear());
+        d.setFullYear(d2.getFullYear());
         return d; 
     }, 
     
