@@ -74,7 +74,7 @@ foam.CLASS({
                         rowPropertiesDAO: this.TeamDAO, // or pass in rowDAO //make it dao based.
                         colPropertiesArray: ['alive', 'dead', 'MIA', undefined], //or pass in colDAO
                         rowDAOMatchUndefined: true,
-                        wrapperDAOClass: 'com.serviceecho.dao.ReferenceDAO', 
+                        wrapperDAOClass: 'foam.dao.ReferenceDAO', 
                 });
         }
     ],

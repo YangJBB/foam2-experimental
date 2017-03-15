@@ -158,10 +158,14 @@ foam.CLASS({
         var self = this;
         this.unfilteredDAO.where(this.selectionQuery)
             .select(this.Count.create())
-            .then(function(c) { self.totalCount_ = c.value; });
+            .then(function(c) {
+                self.totalCount_ = c.value;
+                });
         this.data.where(this.selectionQuery)
             .select(this.Count.create())
-            .then(function(c) { self.filteredCount_ = c.value; });
+            .then(function(c) {
+                self.filteredCount_ = c.value;
+                });
       }
     }
   ],

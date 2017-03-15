@@ -278,7 +278,8 @@ foam.CLASS
         
         function getCellView(a){
             if (this.cellView){
-                var v = this.cellView$cls.create({of: this.of, data: a}, this);
+                var v = this.cellView.create({of: this.of, data: a});
+
                 return v; 
             }
             var d = foam.u2.Element.create('div');
@@ -291,25 +292,38 @@ foam.CLASS
         
         function isRowSelected(){
             if (! this.rowHeaderSelectionProperty) return false; 
-            if (foam.util.compare(this.rowHeaderSelectionProperty, this.rowHeaderUndefinedMatch) === 0 ){
+            if ((typeof this.rowHeaderSelectionProperty == typeof this.rowHeaderUndefinedMatch) &&
+                 foam.util.compare(this.rowHeaderSelectionProperty, this.rowHeaderUndefinedMatch) === 0 ){
                 if (this.rowMatch === undefined ) return true;
                 return false; 
             }
-            if (foam.util.compare(this.rowHeaderSelectionProperty, this.rowMatch) === 0)
+            //if (foam.util.compare(this.rowHeaderSelectionProperty, this.rowMatch) === 0)
+            //if(this.rowPredicate.f(this.rowHeaderSelectionProperty.id?this.rowHeaderSelectionProperty.id:this.this.rowHeaderSelectionProperty ))
+            if (this.checkPredicateAgainstProperty(this.rowPredicate, this.rowProperty, this.rowHeaderSelectionProperty))
                 return true;
             return false; 
         },
         
         function isColSelected(){
-            if (! this.colHeaderSelectionProperty) return false; 
-            if (foam.util.compare(this.colHeaderSelectionProperty, this.colHeaderUndefinedMatch) === 0 ){
+            if (! this.colHeaderSelectionProperty) return false;
+            if ((typeof this.colHeaderSelectionProperty == typeof this.colHeaderUndefinedMatch) &&
+                foam.util.compare(this.colHeaderSelectionProperty, this.colHeaderUndefinedMatch) === 0 ){
                 if (this.colMatch === undefined ) return true;
                 return false; 
             }
             if (foam.util.compare(this.colHeaderSelectionProperty, this.colMatch) === 0)
+            //if (this.colPredicate.f(this.colHeaderSelectionProperty.id?this.colHeaderSelectionProperty.id:this.colHeaderSelectionProperty))
                 return true;
             return false; 
         },
+        
+        function checkPredicateAgainstProperty(p, prop, propValue){
+            var name = (prop.name?prop.name:prop);
+            var value = propValue.id?propValue.id:propValue; 
+            var tempObj = {};
+            tempObj[name] =  value;
+            return p.f(tempObj); 
+        }, 
         
         function isCellSelected(){
             if (foam.util.compare(this.colSelectionProperty, this.colProperty)!== 0 || foam.util.compare(this.rowSelectionProperty, this.rowProperty)!== 0)
