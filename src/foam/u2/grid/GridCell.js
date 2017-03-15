@@ -278,7 +278,7 @@ foam.CLASS
         
         function getCellView(a){
             if (this.cellView){
-                var v = this.cellView.create({of: this.of, data: a});
+                var v = this.cellView.create({of: this.of, data: a}, this);
 
                 return v; 
             }
