@@ -32302,8 +32302,12 @@ foam.CLASS
     ],
 
     exports: [
+        // data.
+        'data as dao',
+        
         // the data entry being selected, not the cell. 
         'entrySelection',
+        
         //the row and clumn properties the cell corresponds to
         'rowSelectionProperty',
         'colSelectionProperty',
@@ -32413,17 +32417,14 @@ foam.CLASS
          {
             name: 'gridRowHeaderCellView',
             class: 'Class',
-            value: 'foam.u2.grid.GridHeaderCell'
          },
         {
             name: 'gridColHeaderCellView',
             class: 'Class',
-            value: 'foam.u2.grid.GridHeaderCell'
          },
         {
             name: 'gridCornerHeaderCellView',
             class: 'Class',
-            value: 'foam.u2.grid.GridHeaderCell'
          },        
          
         /*
@@ -32538,6 +32539,12 @@ foam.CLASS
 
     methods:
     [
+        function init(){
+                        this.data.select().then(function(result){
+                    console.log(result.a.length + " workorders found. "); 
+                }.bind(this));
+        },
+        
         function initE() {
             this.refreshGrid();
             this.start(this.STOP, {data:this}).end();
@@ -32561,23 +32568,26 @@ foam.CLASS
                 for (var j=-1; j< this.colPropertiesArray.length; j++){
                     //corner of cell. 
                     if (i == -1 && j ==-1){
-                        var cornerCell = this.gridCornerHeaderCellView.create({
-                            name: '/'
+                        var cornerCell = this.GridHeaderCell.create({
+                            name: '/',
+                            headerCellView: this.gridCornerHeaderCellView, 
                         }, this);
                         r.add(cornerCell);
                     }else if (j==-1){ //header row 
-                        var rowHeaderCell = this.gridRowHeaderCellView.create({
+                        var rowHeaderCell = this.GridHeaderCell.create({
                             data: this.rowPropertiesArray[i]!==undefined?this.rowPropertiesArray[i]:this.rowHeaderUndefinedMatch,
                             property: this.rowProperty,
-                            isRowHeader: true, 
+                            isRowHeader: true,
+                            headerCellView: this.gridRowHeaderCellView, 
                         }, this); 
                         rowHeaderCell.sub('selected', this.onRowSelect);
                         r.add(rowHeaderCell);
                     }else if (i==-1){ //header column
-                        var colHeaderCell = this.gridColHeaderCellView.create({
+                        var colHeaderCell = this.GridHeaderCell.create({
                             data: this.colPropertiesArray[j]!==undefined?this.colPropertiesArray[j]:this.colHeaderUndefinedMatch,
                             property: this.colProperty,
-                            isColHeader: true, 
+                            isColHeader: true,
+                            headerCellView: this.gridColHeaderCellView, 
                         }, this);
                         colHeaderCell.sub('selected', this.onColSelect);
                         r.add(colHeaderCell);
@@ -33272,7 +33282,10 @@ foam.CLASS
                 b.setNodeName('div');
                 return b; 
             }
-        }, 
+        },
+        {
+            name: 'headerCellView', 
+        },
         {
             name: 'name',
             documentation: 'name of the property, e.g., organizationId', 
@@ -33305,9 +33318,32 @@ foam.CLASS
             //this.property.on.sub(this.onPropertyUpdate); 
         }, 
         
+        //Search if row or col header is being defined, if not, fall back to
+        //one which is specified by the property
+        //if not, just use name of the property. 
         function refreshCell(){
-            var p = foam.u2.Element.create('span');
-            if (this.property && this.property.gridHeaderView){
+            var p = foam.u2.Element.create();
+            if (this.isRowHeader && this.headerCellView){
+                p = this.headerCellView.create({
+                    data: this.data,
+                    property: this.property, 
+                    undefinedMatch: this.rowHeaderUndefinedMatch,
+                    
+                    }, this); 
+            }else if (this.isColHeader && this.headerCellView){
+                p = this.headerCellView.create({
+                    data: this.data,
+                    property: this.property, 
+                    undefinedMatch: this.colHeaderUndefinedMatch,
+                    
+                    }, this); 
+            }else if (this.headerCellView){
+                 p = this.headerCellView.create({
+                    property: this.property, 
+                    data: this.data,                    
+                    }, this); 
+                
+            }else if (this.property && this.property.gridHeaderView){
                 if (this.isRowHeader )
                     if (foam.util.compare(this.rowHeaderUndefinedMatch, this.data) === 0)
                         p.add(this.property.gridHeaderView(undefined));
@@ -33317,10 +33353,10 @@ foam.CLASS
                         p.add(this.property.gridHeaderView(undefined));
                     else p.add(this.property.gridHeaderView(this.data));
                 
-            }else if (this.name){
-                p.add(this.name);
+            }else if (this.data){
+                p.add(this.data.name);
             } else {
-                p.add('N/A');
+                p.add(this.name?this.name:'N/A');
             } 
             this.cell = p;
         }

@@ -12,8 +12,12 @@ foam.CLASS
     ],
 
     exports: [
+        // data.
+        'data as dao',
+        
         // the data entry being selected, not the cell. 
         'entrySelection',
+        
         //the row and clumn properties the cell corresponds to
         'rowSelectionProperty',
         'colSelectionProperty',
@@ -123,17 +127,14 @@ foam.CLASS
          {
             name: 'gridRowHeaderCellView',
             class: 'Class',
-            value: 'foam.u2.grid.GridHeaderCell'
          },
         {
             name: 'gridColHeaderCellView',
             class: 'Class',
-            value: 'foam.u2.grid.GridHeaderCell'
          },
         {
             name: 'gridCornerHeaderCellView',
             class: 'Class',
-            value: 'foam.u2.grid.GridHeaderCell'
          },        
          
         /*
@@ -248,6 +249,12 @@ foam.CLASS
 
     methods:
     [
+        function init(){
+                        this.data.select().then(function(result){
+                    console.log(result.a.length + " workorders found. "); 
+                }.bind(this));
+        },
+        
         function initE() {
             this.refreshGrid();
             this.start(this.STOP, {data:this}).end();
@@ -271,23 +278,26 @@ foam.CLASS
                 for (var j=-1; j< this.colPropertiesArray.length; j++){
                     //corner of cell. 
                     if (i == -1 && j ==-1){
-                        var cornerCell = this.gridCornerHeaderCellView.create({
-                            name: '/'
+                        var cornerCell = this.GridHeaderCell.create({
+                            name: '/',
+                            headerCellView: this.gridCornerHeaderCellView, 
                         }, this);
                         r.add(cornerCell);
                     }else if (j==-1){ //header row 
-                        var rowHeaderCell = this.gridRowHeaderCellView.create({
+                        var rowHeaderCell = this.GridHeaderCell.create({
                             data: this.rowPropertiesArray[i]!==undefined?this.rowPropertiesArray[i]:this.rowHeaderUndefinedMatch,
                             property: this.rowProperty,
-                            isRowHeader: true, 
+                            isRowHeader: true,
+                            headerCellView: this.gridRowHeaderCellView, 
                         }, this); 
                         rowHeaderCell.sub('selected', this.onRowSelect);
                         r.add(rowHeaderCell);
                     }else if (i==-1){ //header column
-                        var colHeaderCell = this.gridColHeaderCellView.create({
+                        var colHeaderCell = this.GridHeaderCell.create({
                             data: this.colPropertiesArray[j]!==undefined?this.colPropertiesArray[j]:this.colHeaderUndefinedMatch,
                             property: this.colProperty,
-                            isColHeader: true, 
+                            isColHeader: true,
+                            headerCellView: this.gridColHeaderCellView, 
                         }, this);
                         colHeaderCell.sub('selected', this.onColSelect);
                         r.add(colHeaderCell);

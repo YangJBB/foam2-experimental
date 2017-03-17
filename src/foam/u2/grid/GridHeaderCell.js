@@ -81,7 +81,10 @@ foam.CLASS
                 b.setNodeName('div');
                 return b; 
             }
-        }, 
+        },
+        {
+            name: 'headerCellView', 
+        },
         {
             name: 'name',
             documentation: 'name of the property, e.g., organizationId', 
@@ -114,9 +117,32 @@ foam.CLASS
             //this.property.on.sub(this.onPropertyUpdate); 
         }, 
         
+        //Search if row or col header is being defined, if not, fall back to
+        //one which is specified by the property
+        //if not, just use name of the property. 
         function refreshCell(){
-            var p = foam.u2.Element.create('span');
-            if (this.property && this.property.gridHeaderView){
+            var p = foam.u2.Element.create();
+            if (this.isRowHeader && this.headerCellView){
+                p = this.headerCellView.create({
+                    data: this.data,
+                    property: this.property, 
+                    undefinedMatch: this.rowHeaderUndefinedMatch,
+                    
+                    }, this); 
+            }else if (this.isColHeader && this.headerCellView){
+                p = this.headerCellView.create({
+                    data: this.data,
+                    property: this.property, 
+                    undefinedMatch: this.colHeaderUndefinedMatch,
+                    
+                    }, this); 
+            }else if (this.headerCellView){
+                 p = this.headerCellView.create({
+                    property: this.property, 
+                    data: this.data,                    
+                    }, this); 
+                
+            }else if (this.property && this.property.gridHeaderView){
                 if (this.isRowHeader )
                     if (foam.util.compare(this.rowHeaderUndefinedMatch, this.data) === 0)
                         p.add(this.property.gridHeaderView(undefined));
@@ -126,10 +152,10 @@ foam.CLASS
                         p.add(this.property.gridHeaderView(undefined));
                     else p.add(this.property.gridHeaderView(this.data));
                 
-            }else if (this.name){
-                p.add(this.name);
+            }else if (this.data){
+                p.add(this.data.name);
             } else {
-                p.add('N/A');
+                p.add(this.name?this.name:'N/A');
             } 
             this.cell = p;
         }
