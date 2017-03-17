@@ -71,7 +71,8 @@ foam.CLASS({
     {
       class: 'Proxy',
       of: 'foam.dao.Sink',
-      name: 'delegate'
+      name: 'delegate',
+      factory: function() { return foam.dao.ArraySink.create(); }
     }
   ]
 });
@@ -220,7 +221,7 @@ foam.CLASS({
     },
     {
       name: 'remove',
-      code:     function remove(obj, fc) {
+      code: function remove(obj, fc) {
         if ( this.predicate.f(obj) ) this.delegate.remove(obj, fc);
       }
     }
