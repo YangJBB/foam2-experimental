@@ -235,8 +235,8 @@ foam.CLASS({
     function toSQL() {
       var s = this.sqlName('arg1');
       s += ' IN ( \'';
-      if ( Array.isArray(this.arg2) ) {
-        s += this.arg2.join('\', \'');
+      if ( this.arg2 && Array.isArray(this.arg2.value) ) {
+        s += this.arg2.value.join('\', \'');
       } else {
         s += this.sqlValue('arg2');
       }

@@ -257,12 +257,11 @@ foam.CLASS
         
         function initE() {
             this.refreshGrid();
-            this.start(this.STOP, {data:this}).end();
             this.cssClass(this.myCls('grid-table')).
             start('table').
                 add(this.body$).
             end('table');
-
+            this.start(this.STOP, {data:this}).end();
         },
         
 
