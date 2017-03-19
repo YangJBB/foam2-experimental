@@ -347,9 +347,7 @@ foam.CLASS
                         console.log('no Row Property detected from DAO');
                         return;
                     }else {
-                        var arr = [];
-                        result.a.forEach(function(e){arr.push(e);});
-                        this.rowPropertiesArray = arr; 
+                        this.rowPropertiesArray = result.a;
                     }
                     if (this.rowDAOMatchUndefined){
                         this.rowPropertiesArray.push(undefined); 
@@ -366,9 +364,7 @@ foam.CLASS
                         console.log('no Column Property detected from DAO');
                         return;
                     }else {
-                        var arr = [];
-                        result.a.forEach(function(e){arr.push(e);});
-                        this.colPropertiesArray = arr; 
+                        this.colPropertiesArray = result.a; 
                     }
                     if (this.colDAOMatchUndefined){
                         this.colPropertiesArray.push(undefined); 
