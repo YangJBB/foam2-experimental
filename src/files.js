@@ -195,7 +195,7 @@ FOAM_FILES([
   { name: "foam/u2/view/RecipricalSearch", flags: ['web'] },
   { name: "lib/node/box", flags: ['node'] },
   { name: "foam/net/HTTPMethod" },
-  { name: "lib/net" },
+  { name: "lib/net", flags: ['node'] },
   { name: "foam/doc/DocBrowser", flags: ['debug'] },
   { name: "com/google/cloud/datastore/types", flags: ['gcloud'] },
   { name: "com/google/cloud/datastore/mlang", flags: ['gcloud'] },
