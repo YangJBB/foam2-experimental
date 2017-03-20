@@ -286,6 +286,7 @@ foam.CLASS
                         var rowHeaderCell = this.GridHeaderCell.create({
                             data: this.rowPropertiesArray[i]!==undefined?this.rowPropertiesArray[i]:this.rowHeaderUndefinedMatch,
                             property: this.rowProperty,
+                            colMatch: this.colPropertiesArray,
                             isRowHeader: true,
                             headerCellView: this.gridRowHeaderCellView, 
                         }, this); 
