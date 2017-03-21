@@ -239,24 +239,20 @@ foam.CLASS
                     d = this.wrapperDAOClass.create({delegate: d}, this);
 
                 d.select().then(function(result){
-                    
                     var div = foam.u2.Element.create('div');
                     //console.log('CELL: row:' + this.rowMatch + ' col:' + this.colMatch + ', ' + result.a.length);
-                    if (! result || !result.a || !result.a.length){
-                        //console.log('no result found');
-                    }
-                    result.a.forEach(function(entry){
-                        var v = this.getEntryView(entry); 
-                            v.on('click',  function(){
-                                //console.log('entry selected in GridCel.js');
-                                if (this.cellView && this.cellView.CELL_SELECTION) {
-                                    this.cellView.cellSelection = entry;
-                                } else {
-                                    this.entrySelection = entry;
-                                }
-                        }.bind(this)); 
-                        div.add(v); 
-                    }.bind(this)); 
+                    result && result.a && result.a.forEach(function(entry){
+                        var v = this.getEntryView(entry);
+                        v.on('click',  function(){
+                            //console.log('entry selected in GridCel.js');
+                            if (this.cellView && this.cellView.CELL_SELECTION) {
+                                this.cellView.cellSelection = entry;
+                            } else {
+                                this.entrySelection = entry;
+                            }
+                        }.bind(this));
+                        div.add(v);
+                    }.bind(this));
                     this.cell = div;
                 }.bind(this));
             }else {
