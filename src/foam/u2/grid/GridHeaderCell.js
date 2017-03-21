@@ -66,9 +66,6 @@ foam.CLASS
             class: 'Boolean' 
         },
         {
-            name: 'colMatch'
-        },
-        {
             name: 'selected',
             value: false,
             class: 'Boolean'
