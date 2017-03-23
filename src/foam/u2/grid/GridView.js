@@ -249,11 +249,11 @@ foam.CLASS
 
     methods:
     [
-        function init(){
-                        this.data.select().then(function(result){
-                    console.log(result.a.length + " workorders found. "); 
-                }.bind(this));
-        },
+        // function init(){
+        //     this.data.select().then(function(result){
+        //         console.log(result.a.length + " workorders found. "); 
+        //     }.bind(this));
+        // },
         
         function initE() {
             this.refreshGrid();
