@@ -1,19 +1,86 @@
 foam.LIB({
   name: 'foam.DateTime',
     methods: [
+        
+        function getLocalDateTimeStr(d){
+            var date = new Date(d);
+            var tzo = -date.getTimezoneOffset();
+            var dif = tzo >= 0 ? '+' : '-';
+            var pad = function(num) {
+                    var norm = Math.abs(Math.floor(num));
+                    return (norm < 10 ? '0' : '') + norm;
+                };
+            return date.getFullYear() +
+                '-' + pad(date.getMonth()+1) +
+                '-' + pad(date.getDate()) +
+                'T' + pad(date.getHours()) + ':' +
+                pad(date.getMinutes()) + ':' +
+                pad(date.getSeconds()) +
+                dif + pad(tzo / 60) + ':' +
+                pad(tzo % 60);
+        },
+        
+        function getLocalDateStr(d) {
+            var date = new Date(d);
+            var tzo = -date.getTimezoneOffset();
+            var dif = tzo >= 0 ? '+' : '-';
+            var pad = function(num) {
+                    var norm = Math.abs(Math.floor(num));
+                    return (norm < 10 ? '0' : '') + norm;
+                };
+            return date.getFullYear() +
+                '-' + pad(date.getMonth()+1) +
+                '-' + pad(date.getDate());
+        },
+        
+        function getLocalTimeStr(d) {
+            var date = new Date(d);
+            var tzo = -date.getTimezoneOffset();
+            var dif = tzo >= 0 ? '+' : '-';
+            var pad = function(num) {
+                    var norm = Math.abs(Math.floor(num));
+                    return (norm < 10 ? '0' : '') + norm;
+                };
+            return pad(date.getHours()) + ':' +
+                pad(date.getMinutes()) + ':' +
+                pad(date.getSeconds());
+                /* +
+                dif + pad(tzo / 60) + ':' +
+                pad(tzo % 60);*/
+        },
+        
+        
+        
     function isInstance(o) { return typeof o === 'string'; },
     
     function floatToMinutes(obj){
         return (obj?Math.round(obj):0);
     },
     
+    //d1 is a string. d2: the timezone you want to set to
+    function setTimeZoneOnly(d1str, d2){
+        
+    }, 
+    
+    
     //set the date of d1 to tat of d2
     function setDateOnly(d1, d2){
-        var d = new Date(d1); 
+        var d = new Date(d1);
+        var d2 = d2;
+        
+        //assuming that d2 has only the Year-Month-Date information.
+        //the resultingd2 will have the wrong timezone, but it's okay, since
+        //we're essentially using it as a string parser. 
+        if (typeof d2 == "string"){
+            var a = new Date(d2); 
+            var userTimezoneOffset = a.getTimezoneOffset() * 60000;
+            d2 = new Date(a.getTime() + userTimezoneOffset);
+        }
         d.setDate(d2.getDate());
         d.setMonth(d2.getMonth());
         d.setFullYear(d2.getFullYear());
-        return d; 
+        return d;
+    
     }, 
     
     function toLocalTime(dd){
