@@ -92,12 +92,12 @@ foam.CLASS
         {
             //TODO: 
             name: 'makeRowPredicate',
-            class: 'Function'
+            //class: 'Function'
         },
         
         {
             name: 'makeColPredicate',
-            class: 'Function'
+            //class: 'Function'
         }, 
 
         {
@@ -311,7 +311,9 @@ foam.CLASS
                                 colProperty: this.colProperty,
                                 order: this.order,
                                 wrapperClass: this.cellWrapperClass,
-                                wrapperDAOClass: this.wrapperDAOClass, 
+                                wrapperDAOClass: this.wrapperDAOClass,
+                                makeColPredicate: this.makeColPredicate,
+                                makeRowPredicate: this.makeRowPredicate
                             }, this);
 
                         r.add(currCell);

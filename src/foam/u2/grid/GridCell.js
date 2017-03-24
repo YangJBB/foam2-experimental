@@ -92,14 +92,14 @@ foam.CLASS
         {
             name: 'rowPredicate',
             expression: function(rowProperty, rowMatch, makeRowPredicate){
-                if (makeRowPredicate) return makeRowPredicate();
+                if (makeRowPredicate) return makeRowPredicate(this);
                 return this.makePredicate(rowProperty, rowMatch);
             }
         },
         {
             name: 'colPredicate',
             expression: function(colProperty, colMatch, makeColPredicate){
-                if (makeColPredicate) return makeColPredicate();
+                if (makeColPredicate) return makeColPredicate(this);
                 return this.makePredicate(colProperty, colMatch);
             }
         },
