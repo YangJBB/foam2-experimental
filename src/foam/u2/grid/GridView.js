@@ -1,23 +1,21 @@
-foam.CLASS
-({
+foam.CLASS({
     package: 'foam.u2.grid',
     name: 'GridView',
     extends: 'foam.u2.Element',
-    
-    requires:
-    [
-        'foam.u2.Element', 
+
+    requires: [
+        'foam.u2.Element',
         'foam.u2.grid.GridCell',
-        'foam.u2.grid.GridHeaderCell' 
+        'foam.u2.grid.GridHeaderCell'
     ],
 
     exports: [
         // data.
         'data as dao',
-        
+
         // the data entry being selected, not the cell. 
         'entrySelection',
-        
+
         //the row and clumn properties the cell corresponds to
         'rowSelectionProperty',
         'colSelectionProperty',
@@ -26,9 +24,8 @@ foam.CLASS
         'colHeaderSelectionProperty',
         'rowHeaderUndefinedMatch',
         'colHeaderUndefinedMatch'
-        
     ],
-    
+
     axioms: [
       foam.u2.CSS.create({
           code: function() {/*
@@ -36,15 +33,15 @@ foam.CLASS
                 border: 1px solid black;
                 border-collapse: collapse;
             }
-            
+
             ^grid-table tr td{
                 border: 1px solid black;
             }
-            
+
             ^hidden {
               display: none !important;
             }
-                
+
           */}
         })
       ],
@@ -235,26 +232,27 @@ foam.CLASS
         {
             name: 'rowArray',
             factory: function(){return []; },
-        }, 
+        },
         {
             name: 'visibleRowIds',
-            documentation: 'toggles the visibility of Rows. ', 
+            documentation: 'toggles the visibility of Rows. ',
             factory: function(){return []; },
             postSet: function(old, nu){
-                this.updateRowVisibility(old, nu); 
+                this.updateRowVisibility(old, nu);
             }
         }
-        
     ],
 
     methods:
     [
-        // function init(){
-        //     this.data.select().then(function(result){
-        //         console.log(result.a.length + " workorders found. "); 
-        //     }.bind(this));
-        // },
-        
+        function init() {
+            //
+            // FIXME: this explicit sub is required at the moment
+            // colPropertiesArray is working ok
+            //
+            this.propertyChange.sub(this.ROW_PROPERTIES_ARRAY.name, this.refreshGrid);
+        },
+
         function initE() {
             this.refreshGrid();
             this.cssClass(this.myCls('grid-table')).
@@ -263,84 +261,90 @@ foam.CLASS
             end('table');
             this.start(this.STOP, {data:this}).end();
         },
-        
 
-        function refreshGrid(){
-            var b  = this.Element.create().setNodeName('tbody');
-            this.cellArray = []; //hopefully I won't need this anymore. 
-            
+        function refreshGrid(sub, p, name, obj) {
+            var self = this;
+            if (sub && sub.src.rowPropertiesArray) {
+                //
+                // When invoked via propertyChange 'this' is not an instance of GridView
+                //
+                self = sub.src;
+            }
+            var b  = foam.u2.Element.create().setNodeName('tbody');
+            self.cellArray = []; //hopefully I won't need self anymore.
+
             //rowPropertiesArray and colPropertiesArray should already by populated.
-            //populating the table row by row. 
-            for (var i=-1; i< this.rowPropertiesArray.length; i++){
-                var r = foam.u2.Element.create(null, this).setNodeName('tr');
-                var currCellRow = []; 
-                for (var j=-1; j< this.colPropertiesArray.length; j++){
-                    //corner of cell. 
+            //populating the table row by row.
+            for (var i=-1; i< self.rowPropertiesArray.length; i++){
+                var r = foam.u2.Element.create(null, self).setNodeName('tr');
+                var currCellRow = [];
+                for (var j=-1; j< self.colPropertiesArray.length; j++){
+                    //corner of cell.
                     if (i == -1 && j ==-1){
-                        var cornerCell = this.GridHeaderCell.create({
+                        var cornerCell = self.GridHeaderCell.create({
                             name: '/',
-                            headerCellView: this.gridCornerHeaderCellView, 
-                        }, this);
+                            headerCellView: self.gridCornerHeaderCellView,
+                        }, self);
                         r.add(cornerCell);
-                    }else if (j==-1){ //header row 
-                        var rowHeaderCell = this.GridHeaderCell.create({
-                            data: this.rowPropertiesArray[i]!==undefined?this.rowPropertiesArray[i]:this.rowHeaderUndefinedMatch,
-                            property: this.rowProperty,
+                    }else if (j==-1){ //header row
+                        var rowHeaderCell = self.GridHeaderCell.create({
+                            data: self.rowPropertiesArray[i]!==undefined?self.rowPropertiesArray[i]:self.rowHeaderUndefinedMatch,
+                            property: self.rowProperty,
                             isRowHeader: true,
-                            headerCellView: this.gridRowHeaderCellView, 
-                        }, this); 
-                        rowHeaderCell.sub('selected', this.onRowSelect);
+                            headerCellView: self.gridRowHeaderCellView,
+                        }, self);
+                        rowHeaderCell.sub('selected', self.onRowSelect);
                         r.add(rowHeaderCell);
                     }else if (i==-1){ //header column
-                        var colHeaderCell = this.GridHeaderCell.create({
-                            data: this.colPropertiesArray[j]!==undefined?this.colPropertiesArray[j]:this.colHeaderUndefinedMatch,
-                            property: this.colProperty,
+                        var colHeaderCell = self.GridHeaderCell.create({
+                            data: self.colPropertiesArray[j]!==undefined?self.colPropertiesArray[j]:self.colHeaderUndefinedMatch,
+                            property: self.colProperty,
                             isColHeader: true,
-                            headerCellView: this.gridColHeaderCellView, 
-                        }, this);
-                        colHeaderCell.sub('selected', this.onColSelect);
+                            headerCellView: self.gridColHeaderCellView,
+                        }, self);
+                        colHeaderCell.sub('selected', self.onColSelect);
                         r.add(colHeaderCell);
 
                     }else {
-                        var currCell = this.GridCell.create({
-                                data$: this.data$,
-                                cellView: this.cellView, 
-                                rowMatch: this.rowPropertiesArray[i],
-                                colMatch: this.colPropertiesArray[j],
-                                rowProperty: this.rowProperty, 
-                                colProperty: this.colProperty,
-                                order: this.order,
-                                wrapperClass: this.cellWrapperClass,
-                                wrapperDAOClass: this.wrapperDAOClass,
-                                makeColPredicate: this.makeColPredicate,
-                                makeRowPredicate: this.makeRowPredicate
-                            }, this);
+                        var currCell = self.GridCell.create({
+                                data$: self.data$,
+                                cellView: self.cellView, 
+                                rowMatch: self.rowPropertiesArray[i],
+                                colMatch: self.colPropertiesArray[j],
+                                rowProperty: self.rowProperty,
+                                colProperty: self.colProperty,
+                                order: self.order,
+                                wrapperClass: self.cellWrapperClass,
+                                wrapperDAOClass: self.wrapperDAOClass,
+                                makeColPredicate: self.makeColPredicate,
+                                makeRowPredicate: self.makeRowPredicate
+                            }, self);
 
                         r.add(currCell);
-                        currCellRow.push(currCell); 
+                        currCellRow.push(currCell);
                     }
                 }
-                //all cells added to the row. 
+                //all cells added to the row.
                 b.add(r);
 
                 if (i == -1) {
-                    this.headerRow = r;
+                    self.headerRow = r;
                 } else {
                     var key;
-                    if (! this.rowPropertiesArray[i]) key = '';
+                    if (! self.rowPropertiesArray[i]) key = '';
                     else {
-                        key = (this.matchRowId || this.rowPropertiesArray[i].id)?this.rowPropertiesArray[i].id:this.rowPropertiesArray[i]; 
+                        key = (self.matchRowId || self.rowPropertiesArray[i].id)?self.rowPropertiesArray[i].id:self.rowPropertiesArray[i];
                     }
-                    this.rowArray.push([key, r]); 
+                    self.rowArray.push([key, r]);
                 }
                 if (i!=-1){
-                    this.cellArray.push(currCellRow); 
+                    self.cellArray.push(currCellRow);
                 }
             }
-            this.body = b;
-            this.updateRowVisibility(); 
+            self.body = b;
+            self.updateRowVisibility(); 
         },
-        
+
         function populateRowPropertiesArray()
         {
             if (this.rowPropertiesDAO){
@@ -358,7 +362,7 @@ foam.CLASS
                 }.bind(this));
             }
         },
-        
+
         function populateColPropertiesArray(){
             if (this.colPropertiesDAO){
                 this.colPropertiesDAO.select().then(function(result){
@@ -414,27 +418,22 @@ foam.CLASS
                         var key = row[0]?row[0]:''; 
                         if ((nu.indexOf(key) == -1) || (!old || old.indexOf(key) == -1 )){
                             console.log('changing visibility of ' + key + ", " + row[1].id); 
-                            row[1].enableCls(this.myCls('hidden'), (nu.indexOf(key)==-1)?true:false); 
+                            row[1].enableCls(this.myCls('hidden'), (nu.indexOf(key)==-1)?true:false);
                         }
                     }.bind(this));
                 }
-            }   
+            }
         }
-        
-        
     ],
-    
-    actions:
-    [
 
+    actions: [
         {
             name: 'stop',
             code: function(){
                 debugger;
             }
         },
-        
-    ], 
+    ],
 
     listeners: [
         {
@@ -446,25 +445,24 @@ foam.CLASS
             }
         },
 
-         {
+        {
             name: 'onDataUpdate',
-            isFramed: true, 
+            isFramed: true,
             code: function() {
                 console.log('Data updated in GridView');
                 this.refreshGrid();
             }
-          },
-          
-          
-          {
+        },
+
+        {
             name: 'onRowSelect',
             isFramed: true,
             code: function(s){
                 console.log('row Selected');
                 var row = s.src;
             }
-          },
-          
+        },
+
         {
             name: 'onColSelect',
             isFramed: true,
@@ -472,25 +470,24 @@ foam.CLASS
                 console.log('col Selected');
                 var col = s.src;
             }
-          },
-          
-          
+        },
+
         {
             name: 'onRowPropertiesDAOUpdate',
             isFramed: true,
             code: function(){
                 if (this.rowPropertiesDAO)
-                this.populateRowPropertiesArray(); 
+                this.populateRowPropertiesArray();
             }
         },
-        
+
         {
             name: 'onColPropertiesDAOUpdate',
             isFramed: true,
             code: function(){
                 if (this.colPropertiesDAO)
-                this.populateColPropertiesArray(); 
+                this.populateColPropertiesArray();
             }
         },
-        ]
+    ]
 });
