@@ -216,11 +216,17 @@ foam.CLASS({
   methods: [
     function toSQL() {
       var s = ' ( ';
+      if (this.args.length > 1) {
+        s += ' ( ';
+      }
       for ( var i = 0 ; i < this.args.length ; i++ ) {
         var a = this.args[i];
         s += a.toSQL();
         if ( i < this.args.length - 1 )
-        s += ' OR ';
+        s += ' ) OR ( ';
+      }
+      if (this.args.length > 1) {
+        s += ' ) ';
       }
       s += ' ) ';
       return s;
