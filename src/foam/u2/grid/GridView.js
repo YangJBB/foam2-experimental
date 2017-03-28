@@ -34,7 +34,7 @@ foam.CLASS({
                 border-collapse: collapse;
             }
 
-            ^grid-table tr td{
+            ^grid-table tr td {
                 border: 1px solid black;
             }
 
@@ -42,6 +42,9 @@ foam.CLASS({
               display: none !important;
             }
 
+            ^grid-table tr td [hidden]{
+                display: none;
+            }
           */}
         })
       ],
