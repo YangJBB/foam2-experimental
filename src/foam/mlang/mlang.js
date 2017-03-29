@@ -1448,16 +1448,17 @@ foam.CLASS({
       },
       name: 'arg2'
     },
-    {
-      name: 'compare',
-      transient: true,
-      documentation: 'Is a property so that it can be bound to "this" so that it works with Array.sort().',
-      factory: function() { return this.compare_.bind(this); }
-    }
+    // {
+    //   name: 'compare',
+    //   transient: true,
+    //   documentation: 'Is a property so that it can be bound to "this" so that it works with Array.sort().',
+    //   factory: function() { return this.compare_.bind(this); }
+    // }
   ],
 
   methods: [
-    function compare_(o1, o2) {
+    //function compare_(o1, o2) {
+    function compare(o1, o2) {
       // an equals of arg1.compare is falsy, which will then hit arg2
       return this.arg1.compare(o1, o2) || this.arg2.compare(o1, o2);
     },
