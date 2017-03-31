@@ -56,11 +56,13 @@ foam.CLASS({
         {
             name: 'data',
             postSet: function(old, nu){
-                old && old.on && old.on.unsub && old.on.unsub(this.onDataUpdate);
-                nu && nu.on && nu.on.sub(this.onDataUpdate);
+                console.log(this.cls_.name, 'data');
+                this.dataSub_ && this.dataSub_.detach();
+                this.dataSub_ = nu && nu.on && nu.on.sub(this.onDataUpdate);
                 this.onDataUpdate();
             }
         },
+        'dataSub_',
         {
           class: 'Class',
           name: 'of' 
@@ -161,7 +163,8 @@ foam.CLASS({
             //can be supplied by user, or extrated from data using colProperty. 
             name: 'colPropertiesArray',
             value: [], 
-            postSet: function(){
+            postSet: function(old, nu) {
+                console.log(this.cls_.name, 'colPropertiesArray');
                 this.onDataUpdate();
             }
         },
@@ -170,7 +173,7 @@ foam.CLASS({
             //can be supplied by user, or extrated from data using colProperty. 
             name: 'rowPropertiesArray',
             value: [],
-            postSet: function(){
+            postSet: function(old, nu) {
                 this.onDataUpdate();
             }
         },
@@ -273,6 +276,7 @@ foam.CLASS({
                 //
                 self = sub.src;
             }
+            console.log(self.cls_.name, 'refreshGrid', sub, p, name, obj);
             var b  = foam.u2.Element.create().setNodeName('tbody');
             self.cellArray = []; //hopefully I won't need self anymore.
 
@@ -450,9 +454,10 @@ foam.CLASS({
 
         {
             name: 'onDataUpdate',
-            isFramed: true,
+            isMerged: true,
+            mergeDelay: 100,
             code: function() {
-                console.log('Data updated in GridView');
+                console.log('onDataUpdate');
                 this.refreshGrid();
             }
         },
@@ -461,7 +466,7 @@ foam.CLASS({
             name: 'onRowSelect',
             isFramed: true,
             code: function(s){
-                console.log('row Selected');
+                console.log('onRowSelect');
                 var row = s.src;
             }
         },
@@ -470,14 +475,14 @@ foam.CLASS({
             name: 'onColSelect',
             isFramed: true,
             code: function(s){
-                console.log('col Selected');
+                console.log('onColSelect');
                 var col = s.src;
             }
         },
 
         {
             name: 'onRowPropertiesDAOUpdate',
-            isFramed: true,
+            isMerged: true,
             code: function(){
                 if (this.rowPropertiesDAO)
                 this.populateRowPropertiesArray();
@@ -486,7 +491,7 @@ foam.CLASS({
 
         {
             name: 'onColPropertiesDAOUpdate',
-            isFramed: true,
+            isMerged: true,
             code: function(){
                 if (this.colPropertiesDAO)
                 this.populateColPropertiesArray();
