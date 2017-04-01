@@ -4,6 +4,10 @@ foam.CLASS
     name: 'GridHeaderCell',
     extends: 'foam.u2.Element',
 
+    exports: [
+        'selected as headerSelected',
+    ],
+    
     imports: [
         'rowHeaderSelectionProperty',
         'colHeaderSelectionProperty',
@@ -102,7 +106,7 @@ foam.CLASS
     methods: [
         function initE() {
             this.cell.cssClass(this.myCls('cell-header'));
-            this.on('click', this.onClick);
+            //this.on('click', this.onClick);
             this.setNodeName('td');
             this.cssClass(this.myCls('grid-header-cell'));
             this.add(this.cell$);
@@ -163,38 +167,38 @@ foam.CLASS
     ],
     
     listeners: [
-        {
-            name: 'onClick',
-            isFramed: true,
-            code: function(){
-                //console.log('Gridheadercell clicked');
-                if (! this.selected){
-                    this.selected = true;
-                    if (this.isRowHeader) this.rowHeaderSelectionProperty = this.data;
-                    else if (this.isColHeader) this.colHeaderSelectionProperty = this.data;
-                } else {
-                    this.selected = false; 
-                    if (this.isRowHeader) this.rowHeaderSelectionProperty = undefined;
-                    else if (this.isColHeader) this.colHeaderSelectionProperty = undefined;
-                }
-            }
+        // {
+        //     name: 'onClick',
+        //     isFramed: true,
+        //     code: function(){
+        //         console.log('GridHeaderCell.onClick');
+        //         if (! this.selected){
+        //             this.selected = true;
+        //             if (this.isRowHeader) this.rowHeaderSelectionProperty = this.data;
+        //             else if (this.isColHeader) this.colHeaderSelectionProperty = this.data;
+        //         } else {
+        //             this.selected = false; 
+        //             if (this.isRowHeader) this.rowHeaderSelectionProperty = undefined;
+        //             else if (this.isColHeader) this.colHeaderSelectionProperty = undefined;
+        //         }
+        //     }
                 
-        },
+        // },
         
         {
             name: 'refreshSelection',
             isFramed: true, 
             code: function (){
-                if ( this.isRowHeader){
-                    if( foam.util.compare(this.rowHeaderSelectionProperty, this.data) === 0)
-                        this.selected = true;
-                    else this.selected = false;
-                }
-                if ( this.isColHeader){
-                    if( foam.util.compare(this.colHeaderSelectionProperty, this.data) === 0)
-                        this.selected = true;
-                    else this.selected = false;
-                }
+                // if ( this.isRowHeader){
+                //     if( foam.util.compare(this.rowHeaderSelectionProperty, this.data) === 0)
+                //         this.selected = true;
+                //     else this.selected = false;
+                // }
+                // if ( this.isColHeader){
+                //     if( foam.util.compare(this.colHeaderSelectionProperty, this.data) === 0)
+                //         this.selected = true;
+                //     else this.selected = false;
+                // }
                 
                 if (this.selected){
                     if (this.isRowHeader) this.enableCls(this.myCls('row-header-highlight'), true);
